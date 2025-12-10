@@ -41,6 +41,40 @@ A TypeScript backend service and CLI for spacecraft mission operations, built wi
    npx mission-ops-copilot --help
    ```
 
+### Makefile shortcuts
+
+Common tasks are available via `Makefile`:
+
+```bash
+# Start the full stack (db + migrate + app)
+make up
+
+# Seed demo data inside the app container
+# Defaults: 120 minutes per spacecraft @ 60s interval
+make seed
+# Customize:
+make seed DURATION=60 INTERVAL=30
+# Dry-run (no writes):
+make seed DRY=1
+
+# Follow logs
+make logs           # all
+make logs-app       # app only
+make logs-db        # db only
+
+# Reset EVERYTHING (drops volumes), then rebuild and start
+make reset
+
+# Prisma/migrations
+make migrate            # run migrate deploy in container
+make prisma-generate    # local prisma generate
+make prisma-migrate-dev # local dev migrations
+
+# Utilities
+make env    # show app container DATA_BACKEND and DATABASE_URL
+make psql   # open psql in db container
+```
+
 ### Simulation and Demo Seeding
 
 This repo includes a simple telemetry simulation layer and a seeding command to populate demo spacecraft, configurations, and historical telemetry.
@@ -53,7 +87,7 @@ This repo includes a simple telemetry simulation layer and a seeding command to 
     - `CUBESAT`: `battery_soc`, `bus_voltage`, `attitude_error_deg`, `magnetorquer_current_ma`, `beacon_rssi_dbm`, `beacon_snr_db`, `mode`
   - `telemetrySimulator.ts`: Generates historical snapshots with small random jitter and occasional spikes to exercise anomaly thresholds.
 
-- CLI seeding command:
+- CLI seeding command (local):
 
   ```bash
   # Seed 120 minutes of telemetry per spacecraft at 60s intervals (defaults)
@@ -71,6 +105,13 @@ This repo includes a simple telemetry simulation layer and a seeding command to 
     - Upserts per-spacecraft config (JSONB) via the `SpacecraftConfigService`
     - Simulates telemetry history into the configured repository
   - Dry-run prints progress without modifying the database or files.
+
+With Docker, prefer the Makefile target which runs inside the container:
+
+```bash
+make up
+make seed DURATION=60 INTERVAL=30
+```
 
 ### Example API Calls
 
@@ -100,7 +141,13 @@ This repo includes a simple telemetry simulation layer and a seeding command to 
 pnpm dev:cli -- list-telemetry --spacecraft-id SC-001 --limit 10
 pnpm dev:cli -- analyze-telemetry --spacecraft-id SC-001 --limit 10
 # Seed demo data
+#         120 = duration (minutes of telemetry per spacecraft)
+#          60 = interval (seconds between telemetry samples)
 pnpm dev:cli -- seed-demo-data 120 60
+
+#          60 = duration (minutes)
+#          30 = interval (seconds)
+#   --dry-run skips all DB writes; prints actions only
 pnpm dev:cli -- seed-demo-data 60 30 --dry-run
 ```
 
@@ -116,7 +163,7 @@ pnpm dev:cli -- seed-demo-data 60 30 --dry-run
 - `pnpm lint` – eslint
 - `pnpm format` – prettier check
 
-### Docker
+### Docker (now with Makefile)
 
 - Prereqs: Docker Desktop (or Docker Engine + Compose).
 
@@ -136,9 +183,8 @@ pnpm dev:cli -- seed-demo-data 60 30 --dry-run
 - Start stack (db + migration + app):
 
   ```bash
-  # Dev (with init script and dev roles)
-  docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
-  docker compose logs -f migrate
+  make up
+  make logs-migrate
   # Expect to see:
   # "All migrations have been successfully applied."
   ```
@@ -157,18 +203,15 @@ pnpm dev:cli -- seed-demo-data 60 30 --dry-run
 - Reset data (DROPS volumes):
 
   ```bash
-  docker compose -f docker-compose.yml -f docker-compose.dev.yml down -v
-  docker compose -f docker-compose.yml -f docker-compose.dev.yml up --build -d
+  make reset
   ```
 
 - If migrations fail with baseline error (P3005):
   ```bash
   # Option A: destructive reset
-  docker compose -f docker-compose.yml -f docker-compose.dev.yml down -v && \
-  docker compose -f docker-compose.yml -f docker-compose.dev.yml up -d
+  make reset
   # Option B: baseline existing schema
-  docker compose run --rm migrate sh -lc \
-    'pnpm prisma migrate resolve --applied 0001_init && pnpm prisma migrate deploy'
+  docker compose run --rm migrate sh -lc 'pnpm prisma migrate resolve --applied 0001_init && pnpm prisma migrate deploy'
   ```
 
 ### Prisma schema versioning

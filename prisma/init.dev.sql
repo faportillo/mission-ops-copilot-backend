@@ -1,35 +1,20 @@
--- Dev-only initialization script for Postgres least-privilege roles
--- This runs once when the docker-compose Postgres volume is empty.
+-- Dev-only initialization for local simplicity using the current Postgres user.
+-- This script avoids creating extra roles and just sets up the `app` schema
+-- owned by the connected user (e.g., POSTGRES_USER), with sensible privileges.
 
--- Create roles
-DO
-$$
-BEGIN
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mission_migrator') THEN
-      CREATE ROLE mission_migrator LOGIN PASSWORD 'mission_migrator';
-   END IF;
-   IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname = 'mission_app') THEN
-      CREATE ROLE mission_app LOGIN PASSWORD 'mission_app';
-   END IF;
-END
-$$;
+-- Create schema `app` owned by the current user (e.g., POSTGRES_USER)
+CREATE SCHEMA IF NOT EXISTS app AUTHORIZATION CURRENT_USER;
+ALTER SCHEMA app OWNER TO CURRENT_USER;
 
--- Ensure current DB exists and is owned by migrator (compose sets POSTGRES_DB)
--- Grant permissions following least privilege in schema "app"
-CREATE SCHEMA IF NOT EXISTS app AUTHORIZATION mission_migrator;
-ALTER SCHEMA app OWNER TO mission_migrator;
+-- Ensure the current user can use the schema
+GRANT USAGE ON SCHEMA app TO CURRENT_USER;
 
--- App role needs to read/write but not alter structures
-GRANT USAGE ON SCHEMA app TO mission_app;
+-- Default privileges for future objects created by the current user in schema `app`
+ALTER DEFAULT PRIVILEGES FOR USER CURRENT_USER IN SCHEMA app
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO CURRENT_USER;
+ALTER DEFAULT PRIVILEGES FOR USER CURRENT_USER IN SCHEMA app
+GRANT USAGE, SELECT ON SEQUENCES TO CURRENT_USER;
 
--- Default privileges for future objects created by migrator in schema "app"
-ALTER DEFAULT PRIVILEGES FOR USER mission_migrator IN SCHEMA app
-GRANT SELECT, INSERT, UPDATE, DELETE ON TABLES TO mission_app;
-ALTER DEFAULT PRIVILEGES FOR USER mission_migrator IN SCHEMA app
-GRANT USAGE, SELECT ON SEQUENCES TO mission_app;
-
--- If tables are created before grants, you may also need to (no-op if none yet):
-GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO mission_app;
-GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA app TO mission_app;
-
-
+-- If tables already exist (e.g., after a prior migration run), grant privileges now
+GRANT SELECT, INSERT, UPDATE, DELETE ON ALL TABLES IN SCHEMA app TO CURRENT_USER;
+GRANT USAGE, SELECT ON ALL SEQUENCES IN SCHEMA app TO CURRENT_USER;
