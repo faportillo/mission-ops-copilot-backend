@@ -11,6 +11,7 @@ A TypeScript backend service and CLI for spacecraft mission operations, built wi
 - Config via dotenv + Zod, strict TypeScript
 - Logging via Pino wrapper, testable time provider
 - Vitest unit and integration tests
+- Built-in demo simulation and data seeding (deterministic-friendly, AI-free)
 
 ### Core capabilities
 
@@ -40,6 +41,37 @@ A TypeScript backend service and CLI for spacecraft mission operations, built wi
    npx mission-ops-copilot --help
    ```
 
+### Simulation and Demo Seeding
+
+This repo includes a simple telemetry simulation layer and a seeding command to populate demo spacecraft, configurations, and historical telemetry.
+
+- Folder: `src/simulation/`
+  - `spacecraftProfiles.ts`: Four demo profiles with configs and thresholds:
+    - `LEO_IMAGING`: parameters like `battery_soc`, `battery_temp`, `bus_voltage`, `solar_array_current`, `panel_temp`, `payload_temp`, `attitude_error_deg`, `rw{1,2}_speed_rpm`, `images_captured`, `imaging_mode`
+    - `GNSS`: `battery_soc`, `bus_voltage`, `clock_drift_ppb`, `clock_bias_ns`, `nav_signal_power_dbm`, `nav_snr_db`
+    - `GEO_COMMS`: `battery_soc`, `bus_voltage`, `payload_power_w`, `transponder_load_pct`, `uplink_snr_db`, `downlink_snr_db`, `bus_temp`, `payload_temp`
+    - `CUBESAT`: `battery_soc`, `bus_voltage`, `attitude_error_deg`, `magnetorquer_current_ma`, `beacon_rssi_dbm`, `beacon_snr_db`, `mode`
+  - `telemetrySimulator.ts`: Generates historical snapshots with small random jitter and occasional spikes to exercise anomaly thresholds.
+
+- CLI seeding command:
+
+  ```bash
+  # Seed 120 minutes of telemetry per spacecraft at 60s intervals (defaults)
+  pnpm dev:cli -- seed-demo-data
+
+  # Customize duration and interval
+  pnpm dev:cli -- seed-demo-data 60 30
+
+  # Dry-run mode (no writes)
+  pnpm dev:cli -- seed-demo-data 60 30 --dry-run
+  ```
+
+  - The seeder:
+    - Upserts spacecraft by name with the appropriate `missionType`
+    - Upserts per-spacecraft config (JSONB) via the `SpacecraftConfigService`
+    - Simulates telemetry history into the configured repository
+  - Dry-run prints progress without modifying the database or files.
+
 ### Example API Calls
 
 - Create telemetry:
@@ -67,6 +99,9 @@ A TypeScript backend service and CLI for spacecraft mission operations, built wi
 ```bash
 pnpm dev:cli -- list-telemetry --spacecraft-id SC-001 --limit 10
 pnpm dev:cli -- analyze-telemetry --spacecraft-id SC-001 --limit 10
+# Seed demo data
+pnpm dev:cli -- seed-demo-data 120 60
+pnpm dev:cli -- seed-demo-data 60 30 --dry-run
 ```
 
 ### Scripts
@@ -176,6 +211,7 @@ pnpm dev:cli -- analyze-telemetry --spacecraft-id SC-001 --limit 10
 - `src/infrastructure` – repos, logging, time
 - `src/interfaces/http` – Fastify routes/controllers
 - `src/interfaces/cli` – Commander commands
+- `src/simulation` – demo spacecraft profiles and deterministic-friendly telemetry simulator
 
 ### Roadmap
 
