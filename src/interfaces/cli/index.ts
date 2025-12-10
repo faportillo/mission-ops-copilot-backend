@@ -12,12 +12,14 @@ async function main(argv: string[]) {
   const { analyzeTelemetryCommand } = await import('./commands/analyze-telemetry.js');
   const { listEventsCommand } = await import('./commands/list-events.js');
   const { searchDocsCommand } = await import('./commands/search-docs.js');
+  const { seedDemoDataCommand } = await import('./commands/seed-demo-data.js');
 
   program.addCommand(ingestTelemetryCommand(ctx));
   program.addCommand(listTelemetryCommand(ctx));
   program.addCommand(analyzeTelemetryCommand(ctx));
   program.addCommand(listEventsCommand(ctx));
   program.addCommand(searchDocsCommand(ctx));
+  program.addCommand(seedDemoDataCommand(ctx));
 
   await program.parseAsync(argv);
 }
