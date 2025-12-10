@@ -26,6 +26,49 @@ export async function spacecraftRoutes(app: FastifyInstance, ctx: AppContext) {
     };
   });
 
+  app.get('/spacecraft/:id/status', async (request) => {
+    const { id: spacecraftId } = request.params as { id: string };
+    const now = new Date();
+    const h1 = new Date(now.getTime() - 1 * 60 * 60 * 1000);
+    const h6 = new Date(now.getTime() - 6 * 60 * 60 * 1000);
+    const h24 = new Date(now.getTime() - 24 * 60 * 60 * 1000);
+
+    const last = await ctx.telemetryRepository.findRecent(spacecraftId, 1);
+    const lastTimestamp = last.length > 0 ? last[0].timestamp : null;
+
+    const [a1, a6, a24] = await Promise.all([
+      ctx.analyzeTelemetryUseCase.execute({ spacecraftId, from: h1, to: now }),
+      ctx.analyzeTelemetryUseCase.execute({ spacecraftId, from: h6, to: now }),
+      ctx.analyzeTelemetryUseCase.execute({ spacecraftId, from: h24, to: now }),
+    ]);
+
+    const count1h = a1.length;
+    const count6h = a6.length;
+    const count24h = a24.length;
+
+    const sevOrder = { LOW: 1, MEDIUM: 2, HIGH: 3 } as const;
+    const highest24 =
+      a24.reduce<'LOW' | 'MEDIUM' | 'HIGH' | null>((acc, x) => {
+        if (!acc) return x.severity;
+        return sevOrder[x.severity] > sevOrder[acc] ? x.severity : acc;
+      }, null) ?? 'LOW';
+
+    const overallStatus =
+      highest24 === 'HIGH' ? 'CRITICAL' : highest24 === 'MEDIUM' ? 'WARNING' : 'NOMINAL';
+
+    return {
+      spacecraftId,
+      lastTelemetryTimestamp: lastTimestamp,
+      anomalies: {
+        last1h: count1h,
+        last6h: count6h,
+        last24h: count24h,
+      },
+      highestSeverityLast24h: highest24,
+      overallStatus,
+    };
+  });
+
   app.get('/spacecraft/:id/config', async (request, reply) => {
     const { id: spacecraftId } = request.params as { id: string };
 

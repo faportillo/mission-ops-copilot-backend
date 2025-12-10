@@ -50,4 +50,23 @@ export class PostgresTelemetryRepository implements TelemetryRepository {
         })
       : null;
   }
+
+  async findInRange(spacecraftId: string, from: Date, to: Date): Promise<TelemetrySnapshot[]> {
+    const prisma = getPrisma();
+    const rows = await prisma.telemetrySnapshot.findMany({
+      where: {
+        spacecraftId,
+        timestamp: { gte: from, lte: to },
+      },
+      orderBy: { timestamp: 'asc' },
+    });
+    return rows.map((r) =>
+      TelemetrySnapshot.create({
+        id: r.id,
+        spacecraftId: r.spacecraftId,
+        timestamp: r.timestamp,
+        parameters: r.parameters as Record<string, number | string | boolean>,
+      }),
+    );
+  }
 }

@@ -7,6 +7,8 @@ import { extractAnomalyRules } from './anomalyRulesAdapter.js';
 export type AnalyzeTelemetryInput = {
   spacecraftId: string;
   limit?: number;
+  from?: Date;
+  to?: Date;
 };
 
 export class AnalyzeTelemetryUseCase {
@@ -17,8 +19,13 @@ export class AnalyzeTelemetryUseCase {
   ) {}
 
   async execute(input: AnalyzeTelemetryInput): Promise<TelemetryAnomaly[]> {
-    const limit = input.limit ?? 20;
-    const snapshots = await this.repo.findRecent(input.spacecraftId, limit);
+    let snapshots;
+    if (input.from && input.to) {
+      snapshots = await this.repo.findInRange(input.spacecraftId, input.from, input.to);
+    } else {
+      const limit = input.limit ?? 20;
+      snapshots = await this.repo.findRecent(input.spacecraftId, limit);
+    }
     const anomalies: TelemetryAnomaly[] = [];
     if (snapshots.length === 0) return anomalies;
 
@@ -83,9 +90,8 @@ export class AnalyzeTelemetryUseCase {
     }
     this.logger.info('AnalyzeTelemetryUseCase completed', {
       spacecraftId: input.spacecraftId,
-      anomalies: anomalies.length
+      anomalies: anomalies.length,
     });
     return anomalies;
   }
 }
-

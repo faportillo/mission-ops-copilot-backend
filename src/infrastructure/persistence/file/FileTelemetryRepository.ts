@@ -72,4 +72,25 @@ export class FileTelemetryRepository implements TelemetryRepository {
         })
       : null;
   }
+
+  async findInRange(spacecraftId: string, from: Date, to: Date): Promise<TelemetrySnapshot[]> {
+    const records = await this.readAll();
+    const fromMs = from.getTime();
+    const toMs = to.getTime();
+    return records
+      .filter((r) => r.spacecraftId === spacecraftId)
+      .filter((r) => {
+        const t = new Date(r.timestamp).getTime();
+        return t >= fromMs && t <= toMs;
+      })
+      .sort((a, b) => new Date(a.timestamp).getTime() - new Date(b.timestamp).getTime())
+      .map((r) =>
+        TelemetrySnapshot.create({
+          id: r.id,
+          spacecraftId: r.spacecraftId,
+          timestamp: new Date(r.timestamp),
+          parameters: r.parameters,
+        }),
+      );
+  }
 }

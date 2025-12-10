@@ -20,7 +20,12 @@ export const GetTelemetryQuery = z.object({
 });
 export type GetTelemetryQueryType = z.infer<typeof GetTelemetryQuery>;
 
-export const AnalyzeTelemetryQuery = GetTelemetryQuery.extend({});
+export const AnalyzeTelemetryQuery = z.object({
+  spacecraftId: z.string().min(1),
+  limit: z.coerce.number().int().positive().max(100).optional(),
+  from: z.coerce.date().optional(),
+  to: z.coerce.date().optional(),
+});
 export type AnalyzeTelemetryQueryType = z.infer<typeof AnalyzeTelemetryQuery>;
 
 export const GetEventsQuery = z.object({

@@ -61,6 +61,8 @@ export async function telemetryRoutes(app: FastifyInstance, ctx: AppContext) {
     const anomalies = await ctx.analyzeTelemetryUseCase.execute({
       spacecraftId: query.spacecraftId,
       limit: query.limit,
+      from: query.from,
+      to: query.to,
     });
     ctx.logger.info('GET /telemetry/analyze result', {
       spacecraftId: query.spacecraftId,

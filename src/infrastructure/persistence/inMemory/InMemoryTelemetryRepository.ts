@@ -21,6 +21,16 @@ export class InMemoryTelemetryRepository implements TelemetryRepository {
   async findById(id: string): Promise<TelemetrySnapshot | null> {
     return this.storage.get(id) ?? null;
   }
+
+  async findInRange(spacecraftId: string, from: Date, to: Date): Promise<TelemetrySnapshot[]> {
+    const list = this.bySpacecraft.get(spacecraftId) ?? [];
+    const fromMs = from.getTime();
+    const toMs = to.getTime();
+    return list
+      .filter((s) => {
+        const t = s.timestamp.getTime();
+        return t >= fromMs && t <= toMs;
+      })
+      .sort((a, b) => a.timestamp.getTime() - b.timestamp.getTime());
+  }
 }
-
-
