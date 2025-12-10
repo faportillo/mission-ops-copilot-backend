@@ -42,8 +42,8 @@ export type AppContext = {
   llmClient: LlmClient;
 };
 
-export function createAppContext(): AppContext {
-  const config = loadConfig();
+export function createAppContext(passedConfig?: AppConfig): AppContext {
+  const config = passedConfig ?? loadConfig();
   const logger = getLogger();
   const time = new SystemTimeProvider();
 

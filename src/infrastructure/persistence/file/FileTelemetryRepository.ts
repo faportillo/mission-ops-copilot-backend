@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import type { TelemetryRepository } from '../TelemetryRepository.js';
-import type { TelemetrySnapshot } from '../../../domain/telemetry/TelemetrySnapshot.js';
+import { TelemetrySnapshot } from '../../../domain/telemetry/TelemetrySnapshot.js';
 
 type TelemetryRecord = {
   id: string;
@@ -37,7 +37,7 @@ export class FileTelemetryRepository implements TelemetryRepository {
       id: snapshot.id,
       spacecraftId: snapshot.spacecraftId,
       timestamp: snapshot.timestamp.toISOString(),
-      parameters: snapshot.parameters
+      parameters: snapshot.parameters,
     };
     if (idx >= 0) records[idx] = rec;
     else records.push(rec);
@@ -50,21 +50,26 @@ export class FileTelemetryRepository implements TelemetryRepository {
       .filter((r) => r.spacecraftId === spacecraftId)
       .sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
       .slice(0, limit)
-      .map((r) => ({
-        id: r.id,
-        spacecraftId: r.spacecraftId,
-        timestamp: new Date(r.timestamp),
-        parameters: r.parameters
-      }));
+      .map((r) =>
+        TelemetrySnapshot.create({
+          id: r.id,
+          spacecraftId: r.spacecraftId,
+          timestamp: new Date(r.timestamp),
+          parameters: r.parameters,
+        }),
+      );
   }
 
   async findById(id: string): Promise<TelemetrySnapshot | null> {
     const records = await this.readAll();
     const r = records.find((x) => x.id === id);
     return r
-      ? { id: r.id, spacecraftId: r.spacecraftId, timestamp: new Date(r.timestamp), parameters: r.parameters }
+      ? TelemetrySnapshot.create({
+          id: r.id,
+          spacecraftId: r.spacecraftId,
+          timestamp: new Date(r.timestamp),
+          parameters: r.parameters,
+        })
       : null;
   }
 }
-
-
