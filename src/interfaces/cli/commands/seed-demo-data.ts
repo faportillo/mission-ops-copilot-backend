@@ -17,10 +17,15 @@ export async function seedDemoData(
   spacecraftConfigService: SpacecraftConfigService,
   options: SeedOptions,
 ): Promise<void> {
+  const dryRunEffective =
+    Boolean(options?.dryRun) ||
+    process.argv.includes('--dry-run') ||
+    process.env.SEED_DRY_RUN === '1' ||
+    process.env.SEED_DRY_RUN === 'true';
   for (const profile of spacecraftProfiles) {
     // Upsert spacecraft by name (no unique constraint on name; emulate by find then create/update)
     let sc: Spacecraft | null = null;
-    if (!options.dryRun) {
+    if (!dryRunEffective) {
       sc = await prisma.spacecraft.findFirst({
         where: { name: profile.name },
       });
@@ -45,7 +50,7 @@ export async function seedDemoData(
       } as Spacecraft;
     }
 
-    if (!options.dryRun) {
+    if (!dryRunEffective) {
       await spacecraftConfigService.updateConfig(sc.id, profile.config, {
         status: 'approved',
         source: 'seed',
@@ -53,7 +58,7 @@ export async function seedDemoData(
     }
 
     // Simulate telemetry for this spacecraft
-    if (!options.dryRun) {
+    if (!dryRunEffective) {
       await simulateTelemetryForSpacecraft(sc, telemetryRepo, {
         durationMinutes: options.durationMinutesPerSpacecraft,
         intervalSeconds: options.intervalSeconds,
@@ -62,7 +67,7 @@ export async function seedDemoData(
 
     // eslint-disable-next-line no-console
     console.log(
-      `Seeded ${profile.name} (${profile.missionType}) for ${options.durationMinutesPerSpacecraft} minutes @ ${options.intervalSeconds}s interval`,
+      `${dryRunEffective ? '[DRY-RUN] ' : ''}Seeded ${profile.name} (${profile.missionType}) for ${options.durationMinutesPerSpacecraft} minutes @ ${options.intervalSeconds}s interval`,
     );
   }
 }
@@ -77,14 +82,19 @@ export function seedDemoDataCommandFactory(
     .argument('[durationMinutesPerSpacecraft]', 'Minutes of history per spacecraft', '120')
     .argument('[intervalSeconds]', 'Seconds between snapshots', '60')
     .option('--dry-run', 'Dry run (no writes)', false)
-    .action(async (durationStr: string, intervalStr: string, cmd: Command) => {
+    .action(async function (this: Command, durationStr: string, intervalStr: string) {
       const durationMinutesPerSpacecraft = parseInt(durationStr, 10);
       const intervalSeconds = parseInt(intervalStr, 10);
-      const opts = cmd.opts<{ dryRun?: boolean }>();
+      // Commander v12: prefer optsWithGlobals if available; fallback to opts()
+      const anyThis = this as unknown as { optsWithGlobals?: () => any; opts: () => any };
+      const rawOpts =
+        typeof anyThis.optsWithGlobals === 'function' ? anyThis.optsWithGlobals() : anyThis.opts();
+      const argvDryRun = process.argv.includes('--dry-run');
+      const dryRun = Boolean(rawOpts?.dryRun ?? argvDryRun);
       await seedDemoData(prisma, telemetryRepo, spacecraftConfigService, {
         durationMinutesPerSpacecraft,
         intervalSeconds,
-        dryRun: !!opts.dryRun,
+        dryRun,
       });
     });
   return cmd;
