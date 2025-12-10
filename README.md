@@ -1,4 +1,4 @@
-## Mission Ops Copilot
+## Mission Ops Copilot Backend
 
 A TypeScript backend service and CLI for spacecraft mission operations, built with Fastify, Commander, Zod, and a clean hexagonal architecture. It ingests telemetry snapshots, stores mission events and docs, and exposes deterministic anomaly detection via HTTP and CLI. This repo is a stable, deterministic backend focused on data and analysis.
 
