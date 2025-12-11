@@ -32,7 +32,8 @@
     "pino": "^9.3.2",
     "uuid": "^9.0.1",
     "@prisma/client": "^5.20.0",
-    "zod": "^3.23.8"
+    "zod": "^3.23.8",
+    "kafkajs": "^2.2.4"
   },
   "devDependencies": {
     "@types/node": "^20.12.12",

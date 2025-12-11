@@ -8,6 +8,16 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
+// Outbox Event Table
+model OutboxEvent {
+  id          String @id @default(cuid())
+  type        String
+  payload     Json
+  createdAt   DateTime  @default(now())
+  processed_at DateTime?
+  retries     Int     @default(0)
+}
+
 // New model to register spacecraft
 model Spacecraft {
   id          String   @id @default(cuid())

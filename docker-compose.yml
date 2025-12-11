@@ -1,4 +1,40 @@
 services:
+  kafka:
+    image: confluentinc/cp-kafka:7.8.0
+    container_name: missionops-kafka
+    restart: unless-stopped
+    environment:
+      - KAFKA_NODE_ID=1
+      - KAFKA_PROCESS_ROLES=controller,broker
+      - KAFKA_CONTROLLER_LISTENER_NAMES=CONTROLLER
+      - KAFKA_LISTENERS=PLAINTEXT://:9092,CONTROLLER://:9093,PLAINTEXT_HOST://:29092
+      - KAFKA_ADVERTISED_LISTENERS=PLAINTEXT://kafka:9092,PLAINTEXT_HOST://localhost:29092
+      - KAFKA_LISTENER_SECURITY_PROTOCOL_MAP=CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT,PLAINTEXT_HOST:PLAINTEXT
+      - KAFKA_INTER_BROKER_LISTENER_NAME=PLAINTEXT
+      - KAFKA_CONTROLLER_QUORUM_VOTERS=1@kafka:9093
+      - KAFKA_AUTO_CREATE_TOPICS_ENABLE=true
+      - KAFKA_OFFSETS_TOPIC_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_REPLICATION_FACTOR=1
+      - KAFKA_TRANSACTION_STATE_LOG_MIN_ISR=1
+      - KAFKA_MIN_INSYNC_REPLICAS=1
+      - KAFKA_GROUP_INITIAL_REBALANCE_DELAY_MS=0
+      - KAFKA_LOG_DIRS=/var/lib/kafka/data
+      - CLUSTER_ID=4L6g3nShT-eMCtK--X86sw
+    ports:
+      - '29092:29092'
+    volumes:
+      - kafka_data:/var/lib/kafka/data
+    healthcheck:
+      test:
+        [
+          'CMD-SHELL',
+          'kafka-topics --bootstrap-server localhost:9092 --list >/dev/null 2>&1 || exit 1',
+        ]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
+
   db:
     image: postgres:16-alpine
     container_name: missionops-postgres
@@ -38,6 +74,8 @@ services:
         condition: service_healthy
       migrate:
         condition: service_completed_successfully
+      kafka:
+        condition: service_healthy
     environment:
       NODE_ENV: ${NODE_ENV}
       LOG_LEVEL: ${LOG_LEVEL}
@@ -47,8 +85,12 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       DATABASE_URL: ${DATABASE_URL_APP_CONTAINER:-postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}?schema=app}
+      KAFKA_BROKERS: ${KAFKA_BROKERS_APP_CONTAINER:-kafka:9092}
+      KAFKA_CLIENT_ID: ${KAFKA_CLIENT_ID:-mission-ops}
+      KAFKA_GROUP_ID: ${KAFKA_GROUP_ID:-mission-ops-consumers}
     ports:
       - '3000:3000'
 
 volumes:
   pgdata:
+  kafka_data:
