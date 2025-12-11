@@ -8,6 +8,14 @@ export const ConfigSchema = z
     DATA_BACKEND: z.enum(['in-memory', 'file', 'postgres']).default('in-memory'),
     DATA_DIR: z.string().optional(),
     DATABASE_URL: z.string().url().optional(),
+    // Kafka/outbox
+    KAFKA_BROKERS: z.string().optional(),
+    KAFKA_CLIENT_ID: z.string().default('mission-ops'),
+    KAFKA_OUTBOX_ENABLED: z
+      .union([z.boolean(), z.string().transform((v) => v === 'true')])
+      .default(false),
+    KAFKA_OUTBOX_POLL_MS: z.coerce.number().int().positive().default(1000),
+    KAFKA_OUTBOX_BATCH_SIZE: z.coerce.number().int().positive().default(50),
   })
   .refine(
     (cfg) => {

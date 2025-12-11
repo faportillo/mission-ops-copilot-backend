@@ -12,10 +12,15 @@ datasource db {
 model OutboxEvent {
   id          String @id @default(cuid())
   type        String
+  topic       String
+  key         String?
+  headers     Json?
   payload     Json
+  availableAt DateTime  @default(now())
   createdAt   DateTime  @default(now())
   processed_at DateTime?
   retries     Int     @default(0)
+  lastError   String?
 }
 
 // New model to register spacecraft
