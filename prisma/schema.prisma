@@ -53,7 +53,7 @@ model MissionEvent {
 }
 
 model OpsDocument {
-  id       String   @id
+  id       String   @id @default(cuid())
   title    String
   content  String
   tags     String[]

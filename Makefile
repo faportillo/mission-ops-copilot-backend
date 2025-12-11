@@ -17,7 +17,7 @@
 ##     DATA_BACKEND=postgres
 
 .PHONY: help up up-rebuild down down-v ps logs logs-app logs-db logs-migrate \
-	build build-nocache migrate reset seed env prisma-generate prisma-migrate-dev \
+	build build-nocache migrate reset seed seed-docs seed-all env prisma-generate prisma-migrate-dev \
 	prisma-migrate-deploy prisma-studio psql dev dev-cli-local test lint format format-fix
 
 COMPOSE := docker compose -f docker-compose.yml -f docker-compose.dev.yml
@@ -29,6 +29,7 @@ MIGRATE := migrate
 DURATION ?= 120
 INTERVAL ?= 60
 FLAGS    :=
+OVERWRITE ?= false
 ifeq ($(DRY),1)
   FLAGS += --dry-run
 endif
@@ -49,6 +50,8 @@ help:
 	@echo "  build-nocache      Build images without cache"
 	@echo "  migrate            Run prisma migrate deploy in container"
 	@echo "  seed               Seed demo data in container (DURATION, INTERVAL, DRY=1)"
+	@echo "  seed-docs          Seed operations documents (OVERWRITE=true|false, default false)"
+	@echo "  seed-all           Seed demo data then seed ops docs"
 	@echo "  env                Show app container DATA_BACKEND and DATABASE_URL"
 	@echo "  prisma-generate    Generate Prisma client locally"
 	@echo "  prisma-migrate-dev Run Prisma migrate dev locally"
@@ -102,6 +105,11 @@ migrate:
 
 seed:
 	$(COMPOSE) exec $(APP) node dist/interfaces/cli/index.js seed-demo-data $(DURATION) $(INTERVAL) $(FLAGS)
+
+seed-docs:
+	$(COMPOSE) exec $(APP) node dist/interfaces/cli/index.js seed-demo-docs $(OVERWRITE)
+
+seed-all: seed seed-docs
 
 env:
 	$(COMPOSE) exec $(APP) sh -lc 'echo DATA_BACKEND=$$DATA_BACKEND; echo DATABASE_URL=$$DATABASE_URL'

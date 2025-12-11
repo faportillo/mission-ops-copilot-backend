@@ -13,6 +13,7 @@ async function main(argv: string[]) {
   const { listEventsCommand } = await import('./commands/list-events.js');
   const { searchDocsCommand } = await import('./commands/search-docs.js');
   const { seedDemoDataCommand } = await import('./commands/seed-demo-data.js');
+  const { seedDemoDocsCommand } = await import('./commands/seed-demo-docs.js');
 
   program.addCommand(ingestTelemetryCommand(ctx));
   program.addCommand(listTelemetryCommand(ctx));
@@ -20,6 +21,7 @@ async function main(argv: string[]) {
   program.addCommand(listEventsCommand(ctx));
   program.addCommand(searchDocsCommand(ctx));
   program.addCommand(seedDemoDataCommand(ctx));
+  program.addCommand(seedDemoDocsCommand());
 
   await program.parseAsync(argv);
 }
