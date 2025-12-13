@@ -32,11 +32,14 @@ import { SpacecraftConfigService } from './application/spacecraft/SpacecraftConf
 import { DetectAndPersistAnomaliesForSpacecraftUseCase } from './application/telemetry/DetectAndPersistAnomaliesForSpacecraftUseCase.js';
 import { ListSpacecraftConfigUseCase } from './application/spacecraft/ListSpacecraftConfigUseCase.js';
 import { CountSpacecraftConfigsUseCase } from './application/spacecraft/CountSpacecraftConfigsUseCase.js';
+import { getPrisma } from './infrastructure/db/prisma.js';
+import { PrismaClient } from '../prisma/generated/client/index.js';
 
 export type AppContext = {
   config: AppConfig;
   logger: Logger;
   time: TimeProvider;
+  prisma: PrismaClient;
   telemetryRepository: TelemetryRepository;
   eventRepository: EventRepository;
   docsRepository: DocsRepository;
@@ -60,6 +63,8 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
   const logger = getLogger();
   const time = new SystemTimeProvider();
 
+  const prisma = getPrisma();
+
   let telemetryRepository: TelemetryRepository;
   let eventRepository: EventRepository;
   let docsRepository: DocsRepository;
@@ -73,11 +78,11 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
     spacecraftConfigRepository = new InMemorySpacecraftConfigRepository();
     anomalyRepository = new InMemoryAnomalyRepository();
   } else if (config.DATA_BACKEND === 'postgres') {
-    telemetryRepository = new PrismaTelemetryRepository();
-    eventRepository = new PrismaEventRepository();
-    docsRepository = new PrismaDocsRepository();
-    spacecraftConfigRepository = new PrismaSpacecraftConfigRepository();
-    anomalyRepository = new PrismaAnomalyRepository();
+    telemetryRepository = new PrismaTelemetryRepository(prisma);
+    eventRepository = new PrismaEventRepository(prisma);
+    docsRepository = new PrismaDocsRepository(prisma);
+    spacecraftConfigRepository = new PrismaSpacecraftConfigRepository(prisma);
+    anomalyRepository = new PrismaAnomalyRepository(prisma);
   } else {
     telemetryRepository = new InMemoryTelemetryRepository();
     eventRepository = new InMemoryEventRepository();
@@ -115,6 +120,7 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
     config,
     logger,
     time,
+    prisma,
     telemetryRepository,
     eventRepository,
     docsRepository,

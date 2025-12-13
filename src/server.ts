@@ -10,6 +10,7 @@ async function main() {
   const config = loadConfig();
   const logger = getLogger();
   const ctx = createAppContext();
+  const prisma = ctx.prisma;
 
   const app = Fastify({
     logger: {
@@ -23,7 +24,7 @@ async function main() {
     // Start optional Kafka outbox dispatcher
     let dispatcher: OutboxDispatcher | null = null;
     if (config.KAFKA_OUTBOX_ENABLED && config.DATA_BACKEND === 'postgres') {
-      const outboxRepo = new PrismaOutboxRepository();
+      const outboxRepo = new PrismaOutboxRepository(prisma);
       dispatcher = new OutboxDispatcher({
         repo: outboxRepo,
         logger,

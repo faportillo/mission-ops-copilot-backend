@@ -1,11 +1,11 @@
 import type { AnomalyRepository } from '../../AnomalyRepository.js';
 import type { TelemetryAnomaly } from '../../../../domain/telemetry/TelemetryAnomaly.js';
-import { getPrisma } from '../../../db/prisma.js';
+import { PrismaClient } from '../../../../../prisma/generated/client/index.js';
 
 export class PrismaAnomalyRepository implements AnomalyRepository {
+  constructor(private readonly prisma: PrismaClient) {}
   async saveManyUnique(anomalies: TelemetryAnomaly[]): Promise<number> {
     if (anomalies.length === 0) return 0;
-    const prisma = getPrisma();
     const data = anomalies.map((a) => ({
       id: a.id,
       spacecraftId: a.spacecraftId,
@@ -18,7 +18,7 @@ export class PrismaAnomalyRepository implements AnomalyRepository {
       windowStart: a.windowStart ?? null,
       windowEnd: a.windowEnd ?? null,
     }));
-    const res = await prisma.telemetryAnomaly.createMany({
+    const res = await this.prisma.telemetryAnomaly.createMany({
       data,
       skipDuplicates: true,
     });
@@ -26,8 +26,7 @@ export class PrismaAnomalyRepository implements AnomalyRepository {
   }
 
   async findRecent(spacecraftId: string, limit: number): Promise<TelemetryAnomaly[]> {
-    const prisma = getPrisma();
-    const rows = await prisma.telemetryAnomaly.findMany({
+    const rows = await this.prisma.telemetryAnomaly.findMany({
       where: { spacecraftId },
       orderBy: { timestamp: 'desc' },
       take: limit,
@@ -47,8 +46,7 @@ export class PrismaAnomalyRepository implements AnomalyRepository {
   }
 
   async findInRange(spacecraftId: string, from: Date, to: Date): Promise<TelemetryAnomaly[]> {
-    const prisma = getPrisma();
-    const rows = await prisma.telemetryAnomaly.findMany({
+    const rows = await this.prisma.telemetryAnomaly.findMany({
       where: { spacecraftId, timestamp: { gte: from, lte: to } },
       orderBy: { timestamp: 'asc' },
     });

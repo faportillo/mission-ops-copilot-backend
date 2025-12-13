@@ -1,11 +1,12 @@
 import type { EventRepository } from '../../EventRepository.js';
 import type { MissionEvent } from '../../../../domain/events/MissionEvent.js';
-import { getPrisma } from '../../../db/prisma.js';
+import { PrismaClient } from '../../../../../prisma/generated/client/index.js';
 
 export class PrismaEventRepository implements EventRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
   async save(event: MissionEvent): Promise<void> {
-    const prisma = getPrisma();
-    await prisma.missionEvent.upsert({
+    await this.prisma.missionEvent.upsert({
       where: { id: event.id },
       update: {
         spacecraftId: event.spacecraftId,
@@ -28,8 +29,7 @@ export class PrismaEventRepository implements EventRepository {
   }
 
   async findRecent(spacecraftId: string, limit: number): Promise<MissionEvent[]> {
-    const prisma = getPrisma();
-    const rows = await prisma.missionEvent.findMany({
+    const rows = await this.prisma.missionEvent.findMany({
       where: { spacecraftId },
       orderBy: { timestamp: 'desc' },
       take: limit,
@@ -46,8 +46,7 @@ export class PrismaEventRepository implements EventRepository {
   }
 
   async findById(id: string): Promise<MissionEvent | null> {
-    const prisma = getPrisma();
-    const r = await prisma.missionEvent.findUnique({ where: { id } });
+    const r = await this.prisma.missionEvent.findUnique({ where: { id } });
     return r
       ? {
           id: r.id,

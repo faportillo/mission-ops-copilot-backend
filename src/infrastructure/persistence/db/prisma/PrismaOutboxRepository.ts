@@ -1,4 +1,4 @@
-import { getPrisma } from '../../../db/prisma.js';
+import { PrismaClient } from '../../../../../prisma/generated/client/index.js';
 import type { NewOutboxMessage, OutboxMessage, OutboxRepository } from '../../OutboxRepository.js';
 
 function toDomain(row: any): OutboxMessage {
@@ -18,9 +18,10 @@ function toDomain(row: any): OutboxMessage {
 }
 
 export class PrismaOutboxRepository implements OutboxRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
   async enqueue(message: NewOutboxMessage): Promise<OutboxMessage> {
-    const prisma = getPrisma();
-    const created = await prisma.outboxEvent.create({
+    const created = await this.prisma.outboxEvent.create({
       data: {
         type: message.type,
         topic: message.topic,
@@ -34,8 +35,7 @@ export class PrismaOutboxRepository implements OutboxRepository {
   }
 
   async fetchPending(limit: number, now: Date): Promise<OutboxMessage[]> {
-    const prisma = getPrisma();
-    const rows = await prisma.outboxEvent.findMany({
+    const rows = await this.prisma.outboxEvent.findMany({
       where: {
         processed_at: null,
         availableAt: { lte: now },
@@ -47,16 +47,14 @@ export class PrismaOutboxRepository implements OutboxRepository {
   }
 
   async markProcessed(id: string, processedAt: Date): Promise<void> {
-    const prisma = getPrisma();
-    await prisma.outboxEvent.update({
+    await this.prisma.outboxEvent.update({
       where: { id },
       data: { processed_at: processedAt, lastError: null },
     });
   }
 
   async recordFailure(id: string, errorMessage: string, nextAvailableAt: Date): Promise<void> {
-    const prisma = getPrisma();
-    await prisma.outboxEvent.update({
+    await this.prisma.outboxEvent.update({
       where: { id },
       data: {
         retries: { increment: 1 },

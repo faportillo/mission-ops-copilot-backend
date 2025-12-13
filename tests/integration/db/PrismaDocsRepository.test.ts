@@ -4,6 +4,7 @@ import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers
 import type { AppConfig } from '../../../src/config/schema.js';
 import { createAppContext } from '../../../src/index.js';
 import { PrismaDocsRepository } from '../../../src/infrastructure/persistence/db/prisma/PrismaDocsRepository.js';
+import { getPrisma } from '../../../src/infrastructure/db/prisma.js';
 
 let container: StartedPostgreSqlContainer;
 
@@ -31,9 +32,13 @@ describe('PrismaDocsRepository (integration)', () => {
       DATA_BACKEND: 'postgres',
       DATA_DIR: undefined,
       DATABASE_URL: url,
+      KAFKA_CLIENT_ID: 'test',
+      KAFKA_OUTBOX_ENABLED: false,
+      KAFKA_OUTBOX_POLL_MS: 1000,
+      KAFKA_OUTBOX_BATCH_SIZE: 10,
     };
     const ctx = createAppContext(cfg);
-    const repo = new PrismaDocsRepository();
+    const repo = new PrismaDocsRepository(getPrisma());
 
     const doc = {
       id: `doc_${Date.now()}`,

@@ -1,11 +1,12 @@
 import type { SpacecraftConfigRepository } from '../../SpacecraftConfigRepository.js';
 import type { SpacecraftConfig } from '../../../../domain/spacecraft/SpacecraftConfig.js';
-import { getPrisma } from '../../../db/prisma.js';
+import { PrismaClient } from '../../../../../prisma/generated/client/index.js';
 
 export class PrismaSpacecraftConfigRepository implements SpacecraftConfigRepository {
+  constructor(private readonly prisma: PrismaClient) {}
+
   async getBySpacecraftId(spacecraftId: string): Promise<SpacecraftConfig | null> {
-    const prisma = getPrisma();
-    return prisma.spacecraftConfig.findUnique({
+    return this.prisma.spacecraftConfig.findUnique({
       where: { spacecraftId },
     });
   }
@@ -15,8 +16,7 @@ export class PrismaSpacecraftConfigRepository implements SpacecraftConfigReposit
     config: unknown,
     options?: { status?: string; source?: string },
   ): Promise<SpacecraftConfig> {
-    const prisma = getPrisma();
-    return prisma.spacecraftConfig.upsert({
+    return this.prisma.spacecraftConfig.upsert({
       where: { spacecraftId },
       create: {
         spacecraftId,
@@ -32,14 +32,12 @@ export class PrismaSpacecraftConfigRepository implements SpacecraftConfigReposit
     });
   }
   async listConfigsPaged(options: { limit: number; offset: number }): Promise<SpacecraftConfig[]> {
-    const prisma = getPrisma();
-    return prisma.spacecraftConfig.findMany({
+    return this.prisma.spacecraftConfig.findMany({
       skip: options.offset,
       take: options.limit,
     });
   }
   async countConfigs(): Promise<number> {
-    const prisma = getPrisma();
-    return prisma.spacecraftConfig.count();
+    return this.prisma.spacecraftConfig.count();
   }
 }

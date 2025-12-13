@@ -32,10 +32,14 @@ describe('PrismaSpacecraftConfigRepository (integration)', () => {
       DATA_BACKEND: 'postgres',
       DATA_DIR: undefined,
       DATABASE_URL: url,
+      KAFKA_CLIENT_ID: 'test',
+      KAFKA_OUTBOX_ENABLED: false,
+      KAFKA_OUTBOX_POLL_MS: 1000,
+      KAFKA_OUTBOX_BATCH_SIZE: 10,
     };
     const ctx = createAppContext(cfg);
     // Sanity: use the Postgres repo directly
-    const repo = new PrismaSpacecraftConfigRepository();
+    const repo = new PrismaSpacecraftConfigRepository(getPrisma());
 
     const scId = 'SC-DB-CFG';
     // Ensure FK exists
