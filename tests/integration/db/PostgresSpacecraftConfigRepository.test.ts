@@ -3,12 +3,12 @@ import { execa } from 'execa';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import { createAppContext } from '../../../src/index.js';
 import type { AppConfig } from '../../../src/config/schema.js';
-import { PostgresSpacecraftConfigRepository } from '../../../src/infrastructure/persistence/db/PostgresSpacecraftConfigRepository.js';
+import { PrismaSpacecraftConfigRepository } from '../../../src/infrastructure/persistence/db/prisma/PrismaSpacecraftConfigRepository.js';
 import { getPrisma } from '../../../src/infrastructure/db/prisma.js';
 
 let container: StartedPostgreSqlContainer;
 
-describe('PostgresSpacecraftConfigRepository (integration)', () => {
+describe('PrismaSpacecraftConfigRepository (integration)', () => {
   beforeAll(async () => {
     container = await new PostgreSqlContainer().start();
     const url = container.getConnectionUri();
@@ -35,7 +35,7 @@ describe('PostgresSpacecraftConfigRepository (integration)', () => {
     };
     const ctx = createAppContext(cfg);
     // Sanity: use the Postgres repo directly
-    const repo = new PostgresSpacecraftConfigRepository();
+    const repo = new PrismaSpacecraftConfigRepository();
 
     const scId = 'SC-DB-CFG';
     // Ensure FK exists

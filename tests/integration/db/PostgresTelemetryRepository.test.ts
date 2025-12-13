@@ -1,7 +1,7 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import { execa } from 'execa';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
-import { PostgresTelemetryRepository } from '../../../src/infrastructure/persistence/db/PostgresTelemetryRepository.js';
+import { PrismaTelemetryRepository } from '../../../src/infrastructure/persistence/db/prisma/PrismaTelemetryRepository.js';
 import { TelemetrySnapshot } from '../../../src/domain/telemetry/TelemetrySnapshot.js';
 import type { AppConfig } from '../../../src/config/schema.js';
 import { createAppContext } from '../../../src/index.js';
@@ -9,7 +9,7 @@ import { getPrisma } from '../../../src/infrastructure/db/prisma.js';
 
 let container: StartedPostgreSqlContainer;
 
-describe('PostgresTelemetryRepository (integration)', () => {
+describe('PrismaTelemetryRepository (integration)', () => {
   beforeAll(async () => {
     container = await new PostgreSqlContainer().start();
     const url = container.getConnectionUri();
@@ -39,7 +39,7 @@ describe('PostgresTelemetryRepository (integration)', () => {
     };
     const ctx = createAppContext(cfg);
     // Sanity: repo is postgres
-    expect(ctx.telemetryRepository).instanceOf(PostgresTelemetryRepository);
+    expect(ctx.telemetryRepository).instanceOf(PrismaTelemetryRepository);
 
     const s1 = TelemetrySnapshot.create({
       id: 'psql-a',

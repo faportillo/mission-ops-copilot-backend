@@ -1,8 +1,8 @@
-import type { TelemetryRepository } from '../TelemetryRepository.js';
-import { TelemetrySnapshot } from '../../../domain/telemetry/TelemetrySnapshot.js';
-import { getPrisma } from '../../../infrastructure/db/prisma.js';
+import type { TelemetryRepository } from '../../TelemetryRepository.js';
+import { TelemetrySnapshot } from '../../../../domain/telemetry/TelemetrySnapshot.js';
+import { getPrisma } from '../../../db/prisma.js';
 
-export class PostgresTelemetryRepository implements TelemetryRepository {
+export class PrismaTelemetryRepository implements TelemetryRepository {
   async save(snapshot: TelemetrySnapshot): Promise<void> {
     const prisma = getPrisma();
     await prisma.telemetrySnapshot.upsert({

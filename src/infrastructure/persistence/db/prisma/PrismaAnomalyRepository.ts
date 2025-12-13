@@ -1,8 +1,8 @@
-import type { AnomalyRepository } from '../AnomalyRepository.js';
-import type { TelemetryAnomaly } from '../../../domain/telemetry/TelemetryAnomaly.js';
-import { getPrisma } from '../../db/prisma.js';
+import type { AnomalyRepository } from '../../AnomalyRepository.js';
+import type { TelemetryAnomaly } from '../../../../domain/telemetry/TelemetryAnomaly.js';
+import { getPrisma } from '../../../db/prisma.js';
 
-export class PostgresAnomalyRepository implements AnomalyRepository {
+export class PrismaAnomalyRepository implements AnomalyRepository {
   async saveManyUnique(anomalies: TelemetryAnomaly[]): Promise<number> {
     if (anomalies.length === 0) return 0;
     const prisma = getPrisma();

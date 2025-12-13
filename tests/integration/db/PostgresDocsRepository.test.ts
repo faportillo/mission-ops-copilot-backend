@@ -3,11 +3,11 @@ import { execa } from 'execa';
 import { PostgreSqlContainer, StartedPostgreSqlContainer } from '@testcontainers/postgresql';
 import type { AppConfig } from '../../../src/config/schema.js';
 import { createAppContext } from '../../../src/index.js';
-import { PostgresDocsRepository } from '../../../src/infrastructure/persistence/db/PostgresDocsRepository.js';
+import { PrismaDocsRepository } from '../../../src/infrastructure/persistence/db/prisma/PrismaDocsRepository.js';
 
 let container: StartedPostgreSqlContainer;
 
-describe('PostgresDocsRepository (integration)', () => {
+describe('PrismaDocsRepository (integration)', () => {
   beforeAll(async () => {
     container = await new PostgreSqlContainer().start();
     const url = container.getConnectionUri();
@@ -33,7 +33,7 @@ describe('PostgresDocsRepository (integration)', () => {
       DATABASE_URL: url,
     };
     const ctx = createAppContext(cfg);
-    const repo = new PostgresDocsRepository();
+    const repo = new PrismaDocsRepository();
 
     const doc = {
       id: `doc_${Date.now()}`,

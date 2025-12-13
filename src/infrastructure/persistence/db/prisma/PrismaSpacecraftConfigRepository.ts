@@ -1,8 +1,8 @@
-import type { SpacecraftConfigRepository } from '../SpacecraftConfigRepository.js';
-import type { SpacecraftConfig } from '../../../domain/spacecraft/SpacecraftConfig.js';
-import { getPrisma } from '../../db/prisma.js';
+import type { SpacecraftConfigRepository } from '../../SpacecraftConfigRepository.js';
+import type { SpacecraftConfig } from '../../../../domain/spacecraft/SpacecraftConfig.js';
+import { getPrisma } from '../../../db/prisma.js';
 
-export class PostgresSpacecraftConfigRepository implements SpacecraftConfigRepository {
+export class PrismaSpacecraftConfigRepository implements SpacecraftConfigRepository {
   async getBySpacecraftId(spacecraftId: string): Promise<SpacecraftConfig | null> {
     const prisma = getPrisma();
     return prisma.spacecraftConfig.findUnique({

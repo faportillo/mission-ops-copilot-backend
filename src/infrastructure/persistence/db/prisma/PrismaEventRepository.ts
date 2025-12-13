@@ -1,8 +1,8 @@
-import type { EventRepository } from '../EventRepository.js';
-import type { MissionEvent } from '../../../domain/events/MissionEvent.js';
-import { getPrisma } from '../../../infrastructure/db/prisma.js';
+import type { EventRepository } from '../../EventRepository.js';
+import type { MissionEvent } from '../../../../domain/events/MissionEvent.js';
+import { getPrisma } from '../../../db/prisma.js';
 
-export class PostgresEventRepository implements EventRepository {
+export class PrismaEventRepository implements EventRepository {
   async save(event: MissionEvent): Promise<void> {
     const prisma = getPrisma();
     await prisma.missionEvent.upsert({

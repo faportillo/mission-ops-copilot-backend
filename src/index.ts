@@ -20,12 +20,12 @@ import type { EventRepository } from './infrastructure/persistence/EventReposito
 import type { DocsRepository } from './infrastructure/persistence/DocsRepository.js';
 import type { AnomalyRepository } from './infrastructure/persistence/AnomalyRepository.js';
 import type { Logger } from './logging/logger.js';
-import { PostgresTelemetryRepository } from './infrastructure/persistence/db/PostgresTelemetryRepository.js';
-import { PostgresEventRepository } from './infrastructure/persistence/db/PostgresEventRepository.js';
-import { PostgresDocsRepository } from './infrastructure/persistence/db/PostgresDocsRepository.js';
-import { PostgresAnomalyRepository } from './infrastructure/persistence/db/PostgresAnomalyRepository.js';
+import { PrismaTelemetryRepository } from './infrastructure/persistence/db/prisma/PrismaTelemetryRepository.js';
+import { PrismaEventRepository } from './infrastructure/persistence/db/prisma/PrismaEventRepository.js';
+import { PrismaDocsRepository } from './infrastructure/persistence/db/prisma/PrismaDocsRepository.js';
+import { PrismaAnomalyRepository } from './infrastructure/persistence/db/prisma/PrismaAnomalyRepository.js';
 import type { SpacecraftConfigRepository } from './infrastructure/persistence/SpacecraftConfigRepository.js';
-import { PostgresSpacecraftConfigRepository } from './infrastructure/persistence/db/PostgresSpacecraftConfigRepository.js';
+import { PrismaSpacecraftConfigRepository } from './infrastructure/persistence/db/prisma/PrismaSpacecraftConfigRepository.js';
 import { InMemorySpacecraftConfigRepository } from './infrastructure/persistence/inMemory/InMemorySpacecraftConfigRepository.js';
 import { InMemoryAnomalyRepository } from './infrastructure/persistence/inMemory/InMemoryAnomalyRepository.js';
 import { SpacecraftConfigService } from './application/spacecraft/SpacecraftConfigService.js';
@@ -73,11 +73,11 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
     spacecraftConfigRepository = new InMemorySpacecraftConfigRepository();
     anomalyRepository = new InMemoryAnomalyRepository();
   } else if (config.DATA_BACKEND === 'postgres') {
-    telemetryRepository = new PostgresTelemetryRepository();
-    eventRepository = new PostgresEventRepository();
-    docsRepository = new PostgresDocsRepository();
-    spacecraftConfigRepository = new PostgresSpacecraftConfigRepository();
-    anomalyRepository = new PostgresAnomalyRepository();
+    telemetryRepository = new PrismaTelemetryRepository();
+    eventRepository = new PrismaEventRepository();
+    docsRepository = new PrismaDocsRepository();
+    spacecraftConfigRepository = new PrismaSpacecraftConfigRepository();
+    anomalyRepository = new PrismaAnomalyRepository();
   } else {
     telemetryRepository = new InMemoryTelemetryRepository();
     eventRepository = new InMemoryEventRepository();

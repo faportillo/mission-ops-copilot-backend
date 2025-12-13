@@ -1,5 +1,5 @@
-import { getPrisma } from '../../db/prisma.js';
-import type { NewOutboxMessage, OutboxMessage, OutboxRepository } from '../OutboxRepository.js';
+import { getPrisma } from '../../../db/prisma.js';
+import type { NewOutboxMessage, OutboxMessage, OutboxRepository } from '../../OutboxRepository.js';
 
 function toDomain(row: any): OutboxMessage {
   return {
@@ -17,7 +17,7 @@ function toDomain(row: any): OutboxMessage {
   };
 }
 
-export class PostgresOutboxRepository implements OutboxRepository {
+export class PrismaOutboxRepository implements OutboxRepository {
   async enqueue(message: NewOutboxMessage): Promise<OutboxMessage> {
     const prisma = getPrisma();
     const created = await prisma.outboxEvent.create({

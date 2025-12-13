@@ -1,8 +1,8 @@
-import type { DocsRepository } from '../DocsRepository.js';
-import type { OpsDocument } from '../../../domain/docs/OpsDocument.js';
-import { getPrisma } from '../../../infrastructure/db/prisma.js';
+import type { DocsRepository } from '../../DocsRepository.js';
+import type { OpsDocument } from '../../../../domain/docs/OpsDocument.js';
+import { getPrisma } from '../../../db/prisma.js';
 
-export class PostgresDocsRepository implements DocsRepository {
+export class PrismaDocsRepository implements DocsRepository {
   async save(doc: OpsDocument): Promise<void> {
     const prisma = getPrisma();
     await prisma.opsDocument.upsert({
