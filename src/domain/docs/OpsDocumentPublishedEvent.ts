@@ -1,6 +1,6 @@
 // src/domain/docs/OpsDocumentPublishedEvent.ts
 
-import type { DomainEvent } from '../common/DomainEvent';
+import type { DomainEvent } from '../common/DomainEvent.js';
 
 export class OpsDocumentPublishedEvent implements DomainEvent {
   readonly eventType = 'OpsDocumentPublished';

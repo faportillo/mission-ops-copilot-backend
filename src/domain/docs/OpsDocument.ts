@@ -1,7 +1,7 @@
 // src/domain/docs/OpsDocument.ts
 
-import { BaseEntity } from '../common/BaseEntity';
-import { OpsDocumentPublishedEvent } from './OpsDocumentPublishedEvent';
+import { BaseEntity } from '../common/BaseEntity.js';
+import { OpsDocumentPublishedEvent } from './OpsDocumentPublishedEvent.js';
 
 export interface OpsDocumentProps {
   id: string;

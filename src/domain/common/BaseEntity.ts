@@ -1,5 +1,5 @@
 // src/domain/common/BaseEntity.ts
-import type { DomainEvent } from './DomainEvent';
+import type { DomainEvent } from './DomainEvent.js';
 
 export abstract class BaseEntity {
   private domainEvents: DomainEvent[] = [];
