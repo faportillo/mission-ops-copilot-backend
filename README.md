@@ -1,6 +1,105 @@
 ## Mission Ops Copilot Backend
 
-A TypeScript backend service and CLI for spacecraft mission operations, built with Fastify, Commander, Zod, and a clean hexagonal architecture. It ingests telemetry snapshots, stores mission events and docs, and exposes deterministic anomaly detection via HTTP and CLI. This repo is a stable, deterministic backend focused on data and analysis.
+# MissionOps
+
+**MissionOps** is a backend service for managing and analyzing **spacecraft operational data**.
+
+It provides a unified system for working with:
+
+- spacecraft
+- telemetry
+- operational documents
+- detected anomalies
+- derived operational events
+
+The goal is to make spacecraft operations data **structured, queryable, and actionable**, while remaining flexible enough to support many different mission types.
+
+---
+
+## Spacecraft
+
+MissionOps models spacecraft as first-class entities.
+
+Each spacecraft can have:
+
+- identifying metadata (name, mission type, etc.)
+- a configurable set of parameters and tolerances
+- associated telemetry streams
+- associated operational documents
+
+This allows all operational data to be organized and queried on a per-spacecraft basis.
+
+---
+
+## Telemetry
+
+MissionOps ingests spacecraft telemetry as time-series data.
+
+Telemetry:
+
+- supports arbitrary parameters depending on spacecraft type
+- can represent multiple subsystems (thermal, power, communications, etc.)
+- is stored in a way that allows both historical analysis and real-time inspection
+
+Telemetry data can be queried directly or analyzed to detect anomalies.
+
+---
+
+## Anomaly Detection
+
+MissionOps supports rule-based anomaly detection over telemetry data.
+
+Anomalies:
+
+- are evaluated using spacecraft-specific thresholds and tolerances
+- are persisted as first-class records
+- include severity, timing, and contextual information
+
+This makes it possible to review both current and historical operational issues in a consistent way.
+
+---
+
+## Operational Documents
+
+MissionOps stores and manages operational documents such as:
+
+- spacecraft configuration specifications
+- telemetry definitions
+- operational procedures
+- mission notes and reports
+
+Documents:
+
+- can be linked to a spacecraft or stored independently
+- are categorized and searchable
+- can be used as inputs to downstream analysis or automation
+
+Documents are treated as **human-authored operational knowledge**, distinct from structured configuration data.
+
+---
+
+## Events
+
+As data is ingested and analyzed, MissionOps records operational events such as:
+
+- documents being published
+- anomalies being detected
+- configuration changes
+
+These events provide a reliable history of what happened and can be used to trigger downstream processing or integrations.
+
+---
+
+## Interfaces
+
+MissionOps exposes functionality via:
+
+- a REST API for programmatic access and testing
+- CLI tools for seeding data, running simulations, and local workflows
+
+---
+
+MissionOps is designed to serve as a **foundation for spacecraft operations tooling**, enabling analytics, automation, and higher-level decision support systems to be built on t
 
 ### Features
 
