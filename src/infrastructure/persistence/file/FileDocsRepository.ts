@@ -1,7 +1,7 @@
 import { promises as fs } from 'fs';
 import { join } from 'path';
 import type { DocsRepository } from '../DocsRepository.js';
-import type { OpsDocument } from '../../../domain/docs/OpsDocument.js';
+import { OpsDocument } from '../../../domain/docs/OpsDocument.js';
 
 export class FileDocsRepository implements DocsRepository {
   private filePath: string;
@@ -13,7 +13,7 @@ export class FileDocsRepository implements DocsRepository {
     try {
       const data = await fs.readFile(this.filePath, 'utf8');
       const parsed = JSON.parse(data) as OpsDocument[];
-      return parsed.map((d) => ({ ...d, tags: d.tags ?? [] }));
+      return parsed.map((d) => OpsDocument.rehydrate({ ...d, tags: d.tags ?? [] }));
     } catch {
       return [];
     }
@@ -38,8 +38,8 @@ export class FileDocsRepository implements DocsRepository {
     const results = docs.filter(
       (d) =>
         d.title.toLowerCase().includes(q) ||
-        d.content.toLowerCase().includes(q) ||
-        d.tags.some((t) => t.toLowerCase().includes(q))
+        d.body.toLowerCase().includes(q) ||
+        d.tags.some((t) => t.toLowerCase().includes(q)),
     );
     return results.slice(0, limit);
   }
@@ -49,5 +49,3 @@ export class FileDocsRepository implements DocsRepository {
     return docs.find((d) => d.id === id) ?? null;
   }
 }
-
-

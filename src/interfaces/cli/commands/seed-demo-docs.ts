@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import type { PrismaClient } from '@prisma/client';
+import type { PrismaClient } from '../../../../prisma/generated/client/index.js';
 import { getPrisma } from '../../../infrastructure/db/prisma.js';
 import { spacecraftProfiles } from '../../../simulation/spacecraftProfiles.js';
 import { getDocTemplatesForProfile } from '../../../simulation/docTemplates.js';
@@ -49,7 +49,7 @@ export async function seedDocsForDemoSpacecraft(
         if (options.overwriteExisting) {
           await prisma.opsDocument.update({
             where: { id: existing.id },
-            data: { content: t.body, tags },
+            data: { body: t.body, tags },
           });
           updated++;
         } else {
@@ -59,7 +59,7 @@ export async function seedDocsForDemoSpacecraft(
         await prisma.opsDocument.create({
           data: {
             title: t.title,
-            content: t.body,
+            body: t.body,
             tags,
           },
         });

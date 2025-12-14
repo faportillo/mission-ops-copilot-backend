@@ -1,5 +1,6 @@
 import type { DocsRepository } from '../../DocsRepository.js';
-import type { OpsDocument } from '../../../../domain/docs/OpsDocument.js';
+import { OpsDocument } from '../../../../domain/docs/OpsDocument.js';
+import type { OpsDocument as PrismaOpsDocument } from '../../../../../prisma/generated/client/index.js';
 import type { PrismaTx } from '../../../db/prisma.js';
 
 export class PrismaDocsRepository implements DocsRepository {
@@ -8,8 +9,23 @@ export class PrismaDocsRepository implements DocsRepository {
   async save(doc: OpsDocument): Promise<void> {
     await this.prisma.opsDocument.upsert({
       where: { id: doc.id },
-      update: { title: doc.title, content: doc.content, tags: doc.tags },
-      create: { id: doc.id, title: doc.title, content: doc.content, tags: doc.tags },
+      update: {
+        title: doc.title,
+        category: doc.category,
+        tags: doc.tags,
+        body: doc.body,
+        spacecraftId: doc.spacecraftId,
+        publishedAt: doc.publishedAt,
+      },
+      create: {
+        id: doc.id,
+        title: doc.title,
+        category: doc.category,
+        tags: doc.tags,
+        body: doc.body,
+        spacecraftId: doc.spacecraftId,
+        publishedAt: doc.publishedAt,
+      },
     });
   }
 
@@ -19,16 +35,36 @@ export class PrismaDocsRepository implements DocsRepository {
       where: {
         OR: [
           { title: { contains: q, mode: 'insensitive' } },
-          { content: { contains: q, mode: 'insensitive' } },
+          { body: { contains: q, mode: 'insensitive' } },
           { tags: { has: q } },
         ],
       },
       take: limit,
     });
-    return rows;
+    return rows.map((r: PrismaOpsDocument) =>
+      OpsDocument.rehydrate({
+        id: r.id,
+        spacecraftId: r.spacecraftId ?? null,
+        title: r.title,
+        category: r.category,
+        tags: r.tags ?? [],
+        body: r.body,
+        publishedAt: r.publishedAt,
+      }),
+    );
   }
 
   async findById(id: string): Promise<OpsDocument | null> {
-    return this.prisma.opsDocument.findUnique({ where: { id } });
+    const r = await this.prisma.opsDocument.findUnique({ where: { id } });
+    if (!r) return null;
+    return OpsDocument.rehydrate({
+      id: r.id,
+      spacecraftId: r.spacecraftId ?? null,
+      title: r.title,
+      category: r.category,
+      tags: r.tags ?? [],
+      body: r.body,
+      publishedAt: r.publishedAt,
+    });
   }
 }

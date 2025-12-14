@@ -5,6 +5,7 @@ import type { AppConfig } from '../../../src/config/schema.js';
 import { createAppContext } from '../../../src/index.js';
 import { PrismaDocsRepository } from '../../../src/infrastructure/persistence/db/prisma/PrismaDocsRepository.js';
 import { getPrisma } from '../../../src/infrastructure/db/prisma.js';
+import { OpsDocument } from '../../../src/domain/docs/OpsDocument.js';
 
 let container: StartedPostgreSqlContainer;
 
@@ -40,12 +41,13 @@ describe('PrismaDocsRepository (integration)', () => {
     const ctx = createAppContext(cfg);
     const repo = new PrismaDocsRepository(getPrisma());
 
-    const doc = {
+    const doc = OpsDocument.publish({
       id: `doc_${Date.now()}`,
       title: 'Mission Ops Handbook',
-      content: 'Procedures and checklists for operations.',
+      body: 'Procedures and checklists for operations.',
       tags: ['ops', 'handbook'],
-    };
+      category: 'general',
+    });
     await repo.save(doc);
 
     const byId = await repo.findById(doc.id);

@@ -30,10 +30,12 @@ import { InMemorySpacecraftConfigRepository } from './infrastructure/persistence
 import { InMemoryAnomalyRepository } from './infrastructure/persistence/inMemory/InMemoryAnomalyRepository.js';
 import { SpacecraftConfigService } from './application/spacecraft/SpacecraftConfigService.js';
 import { DetectAndPersistAnomaliesForSpacecraftUseCase } from './application/telemetry/DetectAndPersistAnomaliesForSpacecraftUseCase.js';
+import { CreateOpsDocumentUseCase } from './application/docs/CreateOpsDocumentUseCase.js';
 import { ListSpacecraftConfigUseCase } from './application/spacecraft/ListSpacecraftConfigUseCase.js';
 import { CountSpacecraftConfigsUseCase } from './application/spacecraft/CountSpacecraftConfigsUseCase.js';
 import { getPrisma } from './infrastructure/db/prisma.js';
 import { PrismaClient } from '../prisma/generated/client/index.js';
+import { PrismaTransactionManager } from './infrastructure/persistence/db/prisma/PrismaTransactionManager.js';
 
 export type AppContext = {
   config: AppConfig;
@@ -52,6 +54,7 @@ export type AppContext = {
   analyzeTelemetryUseCase: AnalyzeTelemetryUseCase;
   listTelemetryUseCase: ListTelemetryUseCase;
   listEventsUseCase: ListEventsUseCase;
+  createOpsDocumentUseCase: CreateOpsDocumentUseCase;
   searchDocsUseCase: SearchDocsUseCase;
   detectAndPersistAnomaliesUseCase: DetectAndPersistAnomaliesForSpacecraftUseCase;
   listSpacecraftConfigUseCase: ListSpacecraftConfigUseCase;
@@ -64,6 +67,7 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
   const time = new SystemTimeProvider();
 
   const prisma = getPrisma();
+  const txManager = new PrismaTransactionManager(prisma);
 
   let telemetryRepository: TelemetryRepository;
   let eventRepository: EventRepository;
@@ -93,6 +97,7 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
 
   const telemetryService = new TelemetryService(telemetryRepository, logger);
   const spacecraftConfigService = new SpacecraftConfigService(spacecraftConfigRepository);
+  const createOpsDocumentUseCase = new CreateOpsDocumentUseCase(txManager);
   const analyzeTelemetryUseCase = new AnalyzeTelemetryUseCase(
     telemetryRepository,
     spacecraftConfigRepository,
@@ -133,6 +138,7 @@ export function createAppContext(passedConfig?: AppConfig): AppContext {
     analyzeTelemetryUseCase,
     listTelemetryUseCase,
     listEventsUseCase,
+    createOpsDocumentUseCase,
     searchDocsUseCase,
     listSpacecraftConfigUseCase,
     countSpacecraftConfigsUseCase,

@@ -125,7 +125,7 @@ dev-cli-local:
 	pnpm dev:cli -- $(ARGS)
 
 test:
-	pnpm test
+	pnpm test --run
 
 lint:
 	pnpm lint

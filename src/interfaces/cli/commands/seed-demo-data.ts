@@ -1,5 +1,5 @@
 import { Command } from 'commander';
-import type { PrismaClient, Spacecraft } from '@prisma/client';
+import type { PrismaClient, Spacecraft } from '../../../../prisma/generated/client/index.js';
 import type { TelemetryRepository } from '../../../infrastructure/persistence/TelemetryRepository.js';
 import type { SpacecraftConfigService } from '../../../application/spacecraft/SpacecraftConfigService.js';
 import { spacecraftProfiles } from '../../../simulation/spacecraftProfiles.js';

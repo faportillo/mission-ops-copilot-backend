@@ -45,14 +45,15 @@ describe('HTTP docs routes with Postgres (Testcontainers)', () => {
       method: 'POST',
       url: '/docs',
       payload: {
+        spacecraftId: 'sc-1',
         title: 'Operations Handbook',
-        content: 'This is the mission operations handbook content.',
+        body: 'This is the mission operations handbook content.',
         tags: ['ops', 'handbook'],
       },
     });
     expect(resPost.statusCode).toBe(201);
-    const { id } = resPost.json() as { id: string };
-    expect(id).toBeDefined();
+    const { documentId } = resPost.json() as { documentId: string };
+    expect(documentId).toBeDefined();
 
     const resSearch = await app.inject({
       method: 'GET',
@@ -60,7 +61,7 @@ describe('HTTP docs routes with Postgres (Testcontainers)', () => {
     });
     expect(resSearch.statusCode).toBe(200);
     const results = resSearch.json() as Array<{ id: string; title: string }>;
-    expect(results.some((d) => d.id === id)).toBe(true);
+    expect(results.some((d) => d.id === documentId)).toBe(true);
 
     await app.close();
   }, 120_000);

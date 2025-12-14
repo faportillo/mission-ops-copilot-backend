@@ -30,7 +30,7 @@ describe('PrismaTransactionManager (integration)', () => {
       await ctx.docs.save({
         id,
         title: 'TXM Doc',
-        content: 'Atomic write content',
+        body: 'Atomic write content',
         tags: ['txm'],
       } as any);
       await ctx.outbox.enqueue({
@@ -58,7 +58,7 @@ describe('PrismaTransactionManager (integration)', () => {
         await ctx.docs.save({
           id,
           title: 'Rollback Doc',
-          content: 'Should rollback',
+          body: 'Should rollback',
           tags: [],
         } as any);
         await ctx.outbox.enqueue({

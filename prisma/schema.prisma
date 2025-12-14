@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "./generated/client"
   binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
@@ -68,10 +69,13 @@ model MissionEvent {
 }
 
 model OpsDocument {
-  id       String   @id @default(cuid())
-  title    String
-  content  String
-  tags     String[]
+  id            String   @id @default(cuid())
+  spacecraftId  String?
+  title         String
+  category      String   @default("general")
+  tags          String[]
+  body          String
+  publishedAt   DateTime @default(now())
 }
 
 model TelemetryAnomaly {

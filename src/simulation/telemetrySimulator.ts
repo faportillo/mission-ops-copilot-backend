@@ -1,4 +1,4 @@
-import type { Spacecraft } from '@prisma/client';
+import type { Spacecraft } from '../../prisma/generated/client/index.js';
 import type { TelemetryRepository } from '../infrastructure/persistence/TelemetryRepository.js';
 import { TelemetrySnapshot } from '../domain/telemetry/TelemetrySnapshot.js';
 

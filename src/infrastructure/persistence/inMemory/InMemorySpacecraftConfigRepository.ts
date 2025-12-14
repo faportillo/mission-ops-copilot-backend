@@ -1,4 +1,4 @@
-import type { SpacecraftConfig } from '@prisma/client';
+import type { SpacecraftConfig } from '../../../../prisma/generated/client/index.js';
 import type { SpacecraftConfigRepository } from '../SpacecraftConfigRepository.js';
 
 export class InMemorySpacecraftConfigRepository implements SpacecraftConfigRepository {

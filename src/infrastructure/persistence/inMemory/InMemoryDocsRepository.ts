@@ -13,8 +13,8 @@ export class InMemoryDocsRepository implements DocsRepository {
     const results = Array.from(this.storage.values()).filter(
       (d) =>
         d.title.toLowerCase().includes(q) ||
-        d.content.toLowerCase().includes(q) ||
-        d.tags.some((t) => t.toLowerCase().includes(q))
+        d.body.toLowerCase().includes(q) ||
+        d.tags.some((t) => t.toLowerCase().includes(q)),
     );
     return results.slice(0, limit);
   }
@@ -23,5 +23,3 @@ export class InMemoryDocsRepository implements DocsRepository {
     return this.storage.get(id) ?? null;
   }
 }
-
-

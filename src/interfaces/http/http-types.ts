@@ -34,13 +34,16 @@ export const GetEventsQuery = z.object({
 });
 export type GetEventsQueryType = z.infer<typeof GetEventsQuery>;
 
-export const PostDocBody = z.object({
+export const CreateOpsDocumentInput = z.object({
   id: z.string().optional(),
+  spacecraftId: z.string().min(1),
   title: z.string().min(1),
-  content: z.string().min(1),
+  body: z.string().min(1),
   tags: z.array(z.string()).default([]),
+  category: z.string().optional(),
+  publishedAt: z.coerce.date().optional(),
 });
-export type PostDocBodyType = z.infer<typeof PostDocBody>;
+export type CreateOpsDocumentInputType = z.infer<typeof CreateOpsDocumentInput>;
 
 export const SearchDocsQuery = z.object({
   q: z.string().min(1),

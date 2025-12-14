@@ -1,16 +1,23 @@
 import type { FastifyInstance } from 'fastify';
 import { v4 as uuidv4 } from 'uuid';
-import { PostDocBody, SearchDocsQuery } from '../http-types.js';
+import { CreateOpsDocumentInput, SearchDocsQuery } from '../http-types.js';
 import type { AppContext } from '../../../index.js';
 
 export async function docsRoutes(app: FastifyInstance, ctx: AppContext) {
   app.withTypeProvider().post('/docs', {}, async (req, reply) => {
-    const body = PostDocBody.parse(req.body);
+    const body = CreateOpsDocumentInput.parse(req.body);
     const id = body.id ?? uuidv4();
     ctx.logger.info('POST /docs received', { id, title: body.title });
-    await ctx.docsService.save({ id, title: body.title, content: body.content, tags: body.tags });
-    ctx.logger.info('POST /docs saved', { id });
-    return reply.code(201).send({ id });
+
+    const doc = await ctx.createOpsDocumentUseCase.execute({
+      spacecraftId: body.spacecraftId,
+      title: body.title,
+      body: body.body,
+      tags: body.tags,
+      category: body.category ?? 'general',
+    });
+    ctx.logger.info('POST /docs saved', { documentId: doc.documentId });
+    return reply.code(201).send({ documentId: doc.documentId });
   });
 
   app.withTypeProvider().get('/docs/search', {}, async (req) => {
