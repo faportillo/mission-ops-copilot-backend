@@ -99,7 +99,7 @@ MissionOps exposes functionality via:
 
 ---
 
-MissionOps is designed to serve as a **foundation for spacecraft operations tooling**, enabling analytics, automation, and higher-level decision support systems to be built on t
+MissionOps is designed to serve as a **foundation for spacecraft operations tooling**, enabling analytics, automation, and higher-level decision support systems to be built on top.
 
 ### Features
 
